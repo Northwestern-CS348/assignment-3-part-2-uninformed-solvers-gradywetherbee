@@ -4,16 +4,42 @@ write down the Facts and Rules to model the game state
 shown as the follows:
 
  y\\x   pos1     pos2     pos3
-     ----------------------------
-pos1 | tile5  | tile4  | empty  |
-     ----------------------------
-pos2 | tile6  | tile1  | tile8  |
-     ----------------------------
-pos3 | tile7  | tile3  | tile2  |
-     ----------------------------
+     ┌────────┬────────┬────────┐
+pos1 │ tile5  │ tile4  │ empty  │
+     ├────────┼────────┼────────┤
+pos2 │ tile6  │ tile1  │ tile8  │
+     ├────────┼────────┼────────┤
+pos3 │ tile7  │ tile3  │ tile2  │
+     └────────┴────────┴────────┘
 
-Example: 
+Example:
 fact: (pred obj1 obj2)
 rule: ((pred obj1 obj2) (pred obj2 obj3)) -> (pred obj1 obj3)
 
 """
+fact: (inst tile1 Tile)
+fact: (inst tile2 Tile)
+fact: (inst tile3 Tile)
+fact: (inst tile4 Tile)
+fact: (inst tile5 Tile)
+fact: (inst tile6 Tile)
+fact: (inst tile7 Tile)
+fact: (inst tile8 Tile)
+fact: (inst empty Tile)
+
+fact: (pos tile5 pos1 pos1)
+fact: (pos tile4 pos2 pos1)
+fact: (pos empty pos3 pos1)
+fact: (pos tile8 pos3 pos2)
+fact: (pos tile2 pos3 pos3)
+fact: (pos tile3 pos2 pos3)
+fact: (pos tile7 pos1 pos3)
+fact: (pos tile6 pos1 pos2)
+fact: (pos tile1 pos2 pos2)
+
+rule: ((pos ?tA ?x pos2) (pos ?tB ?x ?y) -> (adj ?tA ?tB))
+rule: ((pos ?tA pos2 ?y) (pos ?tB ?x ?y) -> (adj ?tA ?tB))
+rule: ((adj ?tA ?tB) -> (adj ?tB ?tA))
+
+rule: ((adj ?tA empty) (pos ?tA ?x ?y) (pos empty ?w ?u) -> (movable ?tA ?x ?y ?w ?u))
+

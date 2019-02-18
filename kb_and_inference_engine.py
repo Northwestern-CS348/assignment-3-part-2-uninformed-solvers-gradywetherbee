@@ -167,6 +167,7 @@ class KnowledgeBase(object):
         Returns:
             None
         """
+        print("Retracting a fact")
         printv("Retracting {!r}", 0, verbose, [fact])
         if isinstance(fact, Fact):
             if fact in self.facts:

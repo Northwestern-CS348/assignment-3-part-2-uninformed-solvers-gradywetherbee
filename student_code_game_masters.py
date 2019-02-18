@@ -11,6 +11,10 @@ class TowerOfHanoiGame(GameMaster):
         """
         See overridden parent class method for more information.
 
+        Create the Fact object that could be used to query
+        the KB of the presently available moves. This function
+        is called once per game.
+
         Returns:
              A Fact object that could be used to query the currently available moves
         """
@@ -33,8 +37,38 @@ class TowerOfHanoiGame(GameMaster):
         Returns:
             A Tuple of Tuples that represent the game state
         """
-        ### student code goes here
-        pass
+        ### PEG 1
+        ask = parse_input("fact: (on ?disk peg1)")
+        bindings_of_disks_on_peg1 = self.kb.kb_ask(ask)
+        disks_on_peg1 = [];
+        if bindings_of_disks_on_peg1:
+            for binding in bindings_of_disks_on_peg1.list_of_bindings:
+                disks_on_peg1.append(int(str(binding[0].bindings_dict["?disk"]).replace("disk","")))
+
+        ### PEG 2
+        ask = parse_input("fact: (on ?disk peg2)")
+        bindings_of_disks_on_peg2 = self.kb.kb_ask(ask)
+        disks_on_peg2 = [];
+        if bindings_of_disks_on_peg2:
+            for binding in bindings_of_disks_on_peg2.list_of_bindings:
+                disks_on_peg2.append(int(str(binding[0].bindings_dict["?disk"]).replace("disk", "")))
+
+        ### PEG 3
+        ask = parse_input("fact: (on ?disk peg3)")
+        bindings_of_disks_on_peg3 = self.kb.kb_ask(ask)
+        disks_on_peg3 = [];
+        if bindings_of_disks_on_peg3:
+            for binding in bindings_of_disks_on_peg3.list_of_bindings:
+                disks_on_peg3.append(int(str(binding[0].bindings_dict["?disk"]).replace("disk", "")))
+
+        out = (
+            tuple(sorted(disks_on_peg1)),
+            tuple(sorted(disks_on_peg2)),
+            tuple(sorted(disks_on_peg3)))
+
+        print(out)
+
+        return out
 
     def makeMove(self, movable_statement):
         """
@@ -53,7 +87,38 @@ class TowerOfHanoiGame(GameMaster):
             None
         """
         ### Student code goes here
-        pass
+        disk = movable_statement.terms[0]
+        origin = movable_statement.terms[1]
+        target = movable_statement.terms[2]
+
+        if movable_statement.predicate != "movable":
+            return
+
+            ### Change things about the target
+        ask_about_top = parse_input("fact: (topofstack ?disk " + str(target) + ")")
+        potential_top = self.kb.kb_ask(ask_about_top)
+        if potential_top:
+            potential_top = potential_top[0].bindings_dict["?disk"]
+            self.kb.kb_retract(parse_input("fact: (topofstack " + str(potential_top) + " " + str(target) + ")"))
+
+        self.kb.kb_assert(parse_input("fact: (on " + str(disk) + " " + str(target) + ")"))
+        self.kb.kb_assert(parse_input("fact: (topofstack " + str(disk) + " " + str(target) + ")"))
+        self.kb.kb_retract(parse_input("fact: (topofstack " + str(disk) + " " + str(origin) + ")"))
+
+        ### Change things about the origin
+        ask_about_under = parse_input("fact: (ontopof " + str(disk) + " ?disk_or_base)")
+        print(ask_about_under)
+        under = self.kb.kb_ask(ask_about_under)[0].bindings_dict["?disk_or_base"]
+        if under:
+            self.kb.kb_assert(parse_input("fact: (topofstack " + str(under) + " " + str(origin) + ")"))
+        else:
+            self.kb.kb_assert(parse_input("fact: (empty " + str(origin) + ")"))
+
+        self.kb.kb_retract(parse_input("fact: (on " + str(disk) + " " + str(origin) + ")"))
+
+
+
+        return
 
     def reverseMove(self, movable_statement):
         """
