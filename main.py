@@ -76,6 +76,7 @@ class KBTest(unittest.TestCase):
             'fact: (movable disk1 peg3 peg2)',
         ]
         th.setWinningCondition(required, 'hanoi_all_forbidden.txt')
+        print(self)
         self.assertFalse(th.isWon())
 
         movables = th.getMovables()

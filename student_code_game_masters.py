@@ -116,8 +116,6 @@ class TowerOfHanoiGame(GameMaster):
 
         self.kb.kb_retract(parse_input("fact: (on " + str(disk) + " " + str(origin) + ")"))
 
-
-
         return
 
     def reverseMove(self, movable_statement):
@@ -164,8 +162,70 @@ class Puzzle8Game(GameMaster):
         Returns:
             A Tuple of Tuples that represent the game state
         """
-        ### Student code goes here
-        pass
+
+        things = []
+
+        ask = parse_input("fact: (pos ?tile pos1 pos1)")
+        bindings_tile = self.kb.kb_ask(ask)
+        if bindings_tile:
+            for binding in bindings_tile.list_of_bindings:
+                things.append(int(str(binding[0].bindings_dict["?tile"]).replace("tile", "").replace("empty", "-1")))
+
+        ask = parse_input("fact: (pos ?tile pos2 pos1)")
+        bindings_tile = self.kb.kb_ask(ask)
+        if bindings_tile:
+            for binding in bindings_tile.list_of_bindings:
+                things.append(int(str(binding[0].bindings_dict["?tile"]).replace("tile", "").replace("empty", "-1")))
+
+        ask = parse_input("fact: (pos ?tile pos3 pos1)")
+        bindings_tile = self.kb.kb_ask(ask)
+        if bindings_tile:
+            for binding in bindings_tile.list_of_bindings:
+                things.append(int(str(binding[0].bindings_dict["?tile"]).replace("tile", "").replace("empty", "-1")))
+
+        ask = parse_input("fact: (pos ?tile pos1 pos2)")
+        bindings_tile = self.kb.kb_ask(ask)
+        if bindings_tile:
+            for binding in bindings_tile.list_of_bindings:
+                things.append(int(str(binding[0].bindings_dict["?tile"]).replace("tile", "").replace("empty", "-1")))
+
+        ask = parse_input("fact: (pos ?tile pos2 pos2)")
+        bindings_tile = self.kb.kb_ask(ask)
+        if bindings_tile:
+            for binding in bindings_tile.list_of_bindings:
+                things.append(int(str(binding[0].bindings_dict["?tile"]).replace("tile", "").replace("empty", "-1")))
+
+        ask = parse_input("fact: (pos ?tile pos3 pos2)")
+        bindings_tile = self.kb.kb_ask(ask)
+        if bindings_tile:
+            for binding in bindings_tile.list_of_bindings:
+                things.append(int(str(binding[0].bindings_dict["?tile"].replace("tile", "").replace("empty", "-1"))))
+
+        ask = parse_input("fact: (pos ?tile pos1 pos3)")
+        bindings_tile = self.kb.kb_ask(ask)
+        if bindings_tile:
+            for binding in bindings_tile.list_of_bindings:
+                things.append(int(str(binding[0].bindings_dict["?tile"]).replace("tile", "").replace("empty", "-1")))
+
+        ask = parse_input("fact: (pos ?tile pos2 pos3)")
+        bindings_tile = self.kb.kb_ask(ask)
+        if bindings_tile:
+            for binding in bindings_tile.list_of_bindings:
+                things.append(int(str(binding[0].bindings_dict["?tile"]).replace("tile", "").replace("empty", "-1")))
+
+        ask = parse_input("fact: (pos ?tile pos3 pos3)")
+        bindings_tile = self.kb.kb_ask(ask)
+        if bindings_tile:
+            for binding in bindings_tile.list_of_bindings:
+                things.append(int(str(binding[0].bindings_dict["?tile"]).replace("tile", "").replace("empty", "-1")))
+
+        tuple1 = (things[0], things[1], things[2])
+        tuple2 = (things[3], things[4], things[5])
+        tuple3 = (things[6], things[7], things[8])
+
+        tuple = (tuple1, tuple2, tuple3)
+
+        return tuple
 
     def makeMove(self, movable_statement):
         """
@@ -183,8 +243,19 @@ class Puzzle8Game(GameMaster):
         Returns:
             None
         """
-        ### Student code goes here
-        pass
+
+        tile = movable_statement.terms[0]
+        tilex = movable_statement.terms[1]
+        tiley = movable_statement.terms[2]
+        destx = movable_statement.terms[3]
+        desty = movable_statement.terms[4]
+
+        self.kb.kb_retract(parse_input("fact: (pos " + str(tile) + " " + str(tilex) + " " + str(tiley) + ")"))
+        self.kb.kb_assert(parse_input("fact: (pos " + str(tile) + " " + str(destx) + " " + str(desty) + ")"))
+        self.kb.kb_retract(parse_input("fact: (pos empty " + str(destx) + " " + str(desty) + ")"))
+        self.kb.kb_assert(parse_input("fact: (pos empty " + str(tilex) + " " + str(tiley) + ")"))
+
+        return
 
     def reverseMove(self, movable_statement):
         """
