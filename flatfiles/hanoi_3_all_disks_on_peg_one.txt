@@ -16,17 +16,6 @@ fact: (pred obj1 obj2)
 rule: ((pred obj1 obj2) (pred obj2 obj3)) -> (pred obj1 obj3)
 
 """
-
-fact: (inst disk1 Disk)
-fact: (inst disk2 Disk)
-fact: (inst disk3 Disk)
-
-fact: (inst peg1 Peg)
-fact: (inst peg2 Peg)
-fact: (inst peg3 Peg)
-
-fact: (inst base Base)
-
 fact: (larger disk2 disk1)
 fact: (larger disk3 disk2)
 
@@ -40,8 +29,6 @@ fact: (empty peg2)
 fact: (empty peg3)
 
 rule: ((larger ?diskX ?diskY) (larger ?diskY ?diskZ)) -> (larger ?diskX ?diskZ)
-
-rule: ((on ?diskX ?peg) (on ?diskY ?peg) (larger ?diskX ?diskY)) -> (ontopof ?diskY ?diskX)
 
 rule: ((empty ?target) (topofstack ?disk ?initial)) -> (movable ?disk ?initial ?target)
 rule: ((topofstack ?disk ?initial) (topofstack ?otherDisk ?target) (larger ?otherDisk ?disk)) -> (movable ?disk ?initial ?target)

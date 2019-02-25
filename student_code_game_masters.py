@@ -6,7 +6,7 @@ class TowerOfHanoiGame(GameMaster):
 
     def __init__(self):
         super().__init__()
-        
+
     def produceMovableQuery(self):
         """
         See overridden parent class method for more information.
@@ -37,38 +37,23 @@ class TowerOfHanoiGame(GameMaster):
         Returns:
             A Tuple of Tuples that represent the game state
         """
-        ### PEG 1
-        ask = parse_input("fact: (on ?disk peg1)")
-        bindings_of_disks_on_peg1 = self.kb.kb_ask(ask)
-        disks_on_peg1 = [];
-        if bindings_of_disks_on_peg1:
-            for binding in bindings_of_disks_on_peg1.list_of_bindings:
-                disks_on_peg1.append(int(str(binding[0].bindings_dict["?disk"]).replace("disk","")))
-
-        ### PEG 2
-        ask = parse_input("fact: (on ?disk peg2)")
-        bindings_of_disks_on_peg2 = self.kb.kb_ask(ask)
-        disks_on_peg2 = [];
-        if bindings_of_disks_on_peg2:
-            for binding in bindings_of_disks_on_peg2.list_of_bindings:
-                disks_on_peg2.append(int(str(binding[0].bindings_dict["?disk"]).replace("disk", "")))
-
-        ### PEG 3
-        ask = parse_input("fact: (on ?disk peg3)")
-        bindings_of_disks_on_peg3 = self.kb.kb_ask(ask)
-        disks_on_peg3 = [];
-        if bindings_of_disks_on_peg3:
-            for binding in bindings_of_disks_on_peg3.list_of_bindings:
-                disks_on_peg3.append(int(str(binding[0].bindings_dict["?disk"]).replace("disk", "")))
-
         out = (
-            tuple(sorted(disks_on_peg1)),
-            tuple(sorted(disks_on_peg2)),
-            tuple(sorted(disks_on_peg3)))
-
-        print(out)
+            tuple(self.disksOnPeg("peg1")),
+            tuple(self.disksOnPeg("peg2")),
+            tuple(self.disksOnPeg("peg3")))
 
         return out
+
+    def disksOnPeg(self, peg):
+        ask = parse_input("fact: (on ?disk " + str(peg) + ")")
+        bindings_of_disks_on_peg = self.kb.kb_ask(ask)
+        disks_on_peg = [];
+        if bindings_of_disks_on_peg:
+            for binding in bindings_of_disks_on_peg.list_of_bindings:
+                disks_on_peg.append(int(str(binding[0].bindings_dict["?disk"]).replace("disk", "")))
+
+        return sorted(disks_on_peg)
+
 
     def makeMove(self, movable_statement):
         """
@@ -87,36 +72,45 @@ class TowerOfHanoiGame(GameMaster):
             None
         """
         ### Student code goes here
-        disk = movable_statement.terms[0]
-        origin = movable_statement.terms[1]
-        target = movable_statement.terms[2]
+        game_state = self.getGameState()
 
-        if movable_statement.predicate != "movable":
-            return
+        disk = str(movable_statement.terms[0])
+        origin_peg = str(movable_statement.terms[1])
+        origin_peg_as_int = int(origin_peg.replace("peg",""))
+        target_peg = str(movable_statement.terms[2])
+        target_peg_as_int = int(target_peg.replace("peg",""))
 
-            ### Change things about the target
-        ask_about_top = parse_input("fact: (topofstack ?disk " + str(target) + ")")
-        potential_top = self.kb.kb_ask(ask_about_top)
-        if potential_top:
-            potential_top = potential_top[0].bindings_dict["?disk"]
-            self.kb.kb_retract(parse_input("fact: (topofstack " + str(potential_top) + " " + str(target) + ")"))
-
-        self.kb.kb_assert(parse_input("fact: (on " + str(disk) + " " + str(target) + ")"))
-        self.kb.kb_assert(parse_input("fact: (topofstack " + str(disk) + " " + str(target) + ")"))
-        self.kb.kb_retract(parse_input("fact: (topofstack " + str(disk) + " " + str(origin) + ")"))
-
-        ### Change things about the origin
-        ask_about_under = parse_input("fact: (ontopof " + str(disk) + " ?disk_or_base)")
-        print(ask_about_under)
-        under = self.kb.kb_ask(ask_about_under)[0].bindings_dict["?disk_or_base"]
-        if under:
-            self.kb.kb_assert(parse_input("fact: (topofstack " + str(under) + " " + str(origin) + ")"))
+        if len(game_state[target_peg_as_int - 1]) < 1:  #  -1 Accounts for 0 indexing
+            ### There's no disk on the peg so we need to retract empty
+            self.kb.kb_retract(parse_input("fact: (empty " + target_peg + ")"))
         else:
-            self.kb.kb_assert(parse_input("fact: (empty " + str(origin) + ")"))
+            ### There's at least one disk already on the target peg
+            # top_of_target = game_state[target_peg_as_int - 1][0]
+            self.kb.kb_retract(parse_input("fact: (topofstack disk" + str(game_state[target_peg_as_int - 1][0]) + " " + target_peg + ")"))
 
-        self.kb.kb_retract(parse_input("fact: (on " + str(disk) + " " + str(origin) + ")"))
+        ### Add new facts concerning target peg
+        self.kb.kb_add(parse_input("fact: (on " + disk + " " + target_peg + ")"))
+        self.kb.kb_add(parse_input("fact: (topofstack " + disk + " " + target_peg + ")"))
 
-        return
+        ### Remove old facts concerning origin peg
+        self.kb.kb_retract(parse_input("fact: (on " + disk + " " + origin_peg + ")"))
+        self.kb.kb_retract(parse_input("fact: (topofstack " + disk + " " + origin_peg + ")"))
+
+
+
+        ## ORIGIN: Check if there's a disk below the one we're moving and make it the top
+        if len(game_state[origin_peg_as_int - 1]) < 2:
+            ### There's no disk on the peg so we need to mark it empty
+            self.kb.kb_add(parse_input("fact: (empty " + origin_peg + ")"))
+        else:
+            ## There's at least two disks already on the target peg - we'll move one so this
+            ## checks if there is a disk below the one we want to move
+            second_to_top_of_origin = game_state[origin_peg_as_int - 1][1]
+            self.kb.kb_add(parse_input("fact: (topofstack disk" + str(game_state[origin_peg_as_int - 1][1]) + " " + origin_peg + ")"))
+
+
+
+
 
     def reverseMove(self, movable_statement):
         """
@@ -163,6 +157,7 @@ class Puzzle8Game(GameMaster):
             A Tuple of Tuples that represent the game state
         """
 
+        ### Rewrite with loops later - this is hideous but fine for now
         things = []
 
         ask = parse_input("fact: (pos ?tile pos1 pos1)")
@@ -250,8 +245,11 @@ class Puzzle8Game(GameMaster):
         destx = movable_statement.terms[3]
         desty = movable_statement.terms[4]
 
+        ### Move tile to new position
         self.kb.kb_retract(parse_input("fact: (pos " + str(tile) + " " + str(tilex) + " " + str(tiley) + ")"))
         self.kb.kb_assert(parse_input("fact: (pos " + str(tile) + " " + str(destx) + " " + str(desty) + ")"))
+
+        ### "Move" empty "tile" to actual tile's old position
         self.kb.kb_retract(parse_input("fact: (pos empty " + str(destx) + " " + str(desty) + ")"))
         self.kb.kb_assert(parse_input("fact: (pos empty " + str(tilex) + " " + str(tiley) + ")"))
 

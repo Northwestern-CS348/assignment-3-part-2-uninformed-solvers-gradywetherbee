@@ -49,7 +49,5 @@ fact: (on disk5 peg1)
 
 rule: ((larger ?diskX ?diskY) (larger ?diskY ?diskZ)) -> (larger ?diskX ?diskZ)
 
-rule: ((on ?diskX ?peg) (on ?diskY ?peg) (larger ?diskX ?diskY)) -> (ontopof ?diskY ?diskX)
-
 rule: ((empty ?target) (topofstack ?disk ?initial)) -> (movable ?disk ?initial ?target)
 rule: ((topofstack ?disk ?initial) (topofstack ?otherDisk ?target) (larger ?otherDisk ?disk)) -> (movable ?disk ?initial ?target)
