@@ -44,6 +44,7 @@ class TowerOfHanoiGame(GameMaster):
 
         return out
 
+    # the disks on a peg
     def disksOnPeg(self, peg):
         ask = parse_input("fact: (on ?disk " + str(peg) + ")")
         bindings_of_disks_on_peg = self.kb.kb_ask(ask)
