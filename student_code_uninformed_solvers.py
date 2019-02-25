@@ -127,12 +127,15 @@ class SolverBFS(UninformedSolver):
                     self.currentState = self.currentState.parent
 
                 # navigate back down and go to the children to mark them as visited and keep searching
+                num = len(path) - 1
                 while path:
-                    num = len(path)-1 # get last element of path and the remove it
+
+                     # get last element of path and the remove it
                     move = path[num]
                     path.remove(path[num])
                     self.gm.makeMove(move)
                     new_state = self.gm.getGameState()
+                    num = num - 1
 
                     for child in self.currentState.children:
                         if child.state == new_state:
