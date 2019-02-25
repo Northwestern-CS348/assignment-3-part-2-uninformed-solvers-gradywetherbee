@@ -110,12 +110,13 @@ class SolverBFS(UninformedSolver):
         if self.gm.getMovables() and not self.currentState.children:
             self.findChildren(self.currentState)
 
+        path = []
+
         always = 123 ### runs until we break this loop ourselves
         while always == 123:
             next = self.search_queue.get()
 
             if not next in self.visited:
-                path = []
                 #create the path back to the top
                 while next.requiredMovable:
                     path.append(next.requiredMovable)
